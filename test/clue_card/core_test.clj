@@ -121,6 +121,9 @@
 
                (lack-info-from-game (merge base-game-1 {:lack {"a" {:suspect #{"Green"} :weapon #{"rope"} :location #{"hall"}}}}) (guess "c" "White" "gun" "hall" "b"))
                {"a" {:suspect #{"White" "Green"} :weapon #{"gun" "rope"} :location #{"hall"}} "d" {:suspect #{"White"} :weapon #{"gun"} :location #{"hall"}}}
+
+               (combine-knowledge-types {:suspect #{"White" "Green"} :weapon #{"gun"} :location #{}} {:suspect #{"White" "Mustard"} :weapon #{"knife"} :location #{"dining"}})
+               {:suspect #{"White" "Green" "Mustard"} :weapon #{"gun" "knife"} :location #{"dining"}}
                )))
 
 (deftest turn-tests

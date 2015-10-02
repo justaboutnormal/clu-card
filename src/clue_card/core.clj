@@ -50,6 +50,14 @@
    :weapon   (combine-clue-type :weapon knowledge)
    :location (combine-clue-type :location knowledge)})
 
+(defn combine [clue-type have lack]
+  (into (clue-type have) (clue-type lack)))
+
+(defn combine-knowledge-types [have-knowledge lack-knowledge]
+  {:suspect (combine :suspect have-knowledge lack-knowledge)
+   :weapon (combine :weapon have-knowledge lack-knowledge)
+   :location (combine :location have-knowledge lack-knowledge)})
+
 (defn filter-known-clues-for-guess
   "Returns clues from the guess that are not already known."
   [guess game]

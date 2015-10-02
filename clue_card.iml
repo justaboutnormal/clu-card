@@ -14,7 +14,11 @@
     <orderEntry type="jdk" jdkName="1.8" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Leiningen: clojure-complete:0.2.3" level="project" />
-    <orderEntry type="library" name="Leiningen: org.clojure/clojure:1.6.0" level="project" />
+    <orderEntry type="library" name="Leiningen: lein-kibit:0.1.2" level="project" />
+    <orderEntry type="library" name="Leiningen: org.clojure/clojure:1.7.0" level="project" />
     <orderEntry type="library" name="Leiningen: org.clojure/tools.nrepl:0.2.6" level="project" />
+    <orderEntry type="library" name="Leiningen: jonase/kibit:0.1.2" level="project" />
+    <orderEntry type="library" name="Leiningen: org.clojure/core.logic:0.8.10" level="project" />
+    <orderEntry type="library" name="Leiningen: org.clojure/tools.cli:0.3.1" level="project" />
   </component>
 </module>
