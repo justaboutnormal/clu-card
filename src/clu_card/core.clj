@@ -1,6 +1,4 @@
-(ns clue-card.core
-  ; (:require [clojure.core])
-  )
+(ns clu-card.core)
 
 (defn guess
   "Create a map representing a guess."
@@ -16,8 +14,8 @@
 
 (defn get-middle-players
   "Get players between guesser and disprover, e.g. if a guesses, and d disproves with players [a b c d] vector [b c] should be returned."
-  [arr guess]
-  (let [a (subvec (into arr arr) (inc (.indexOf arr (:player guess))))]
+  [v guess]
+  (let [a (subvec (into v v) (inc (.indexOf v (:player guess))))]
     (subvec a 0 (.indexOf a (:disproved-by guess)))))
 
 (defn has-clue?
@@ -39,9 +37,9 @@
   (reduce (fn [prev [_ clues]] (into prev (or (clue-type clues) #{}))) #{} knowledge))
 
 (defn clue-known?
-  "Is the clue known?"
-  [clue clue-type game]
-  (contains? (combine-clue-type clue-type (:have game)) clue))
+  "Is the clue known? Does anyone have it or does the disprover lack it?"
+  [clue clue-type game player]
+  (or (contains? (combine-clue-type clue-type (:have game)) clue) (contains? (clue-type (or ((or (:lack game) {}) player) #{})) clue)))
 
 (defn combine-knowledge
   "Combine clues of all types."
@@ -54,8 +52,8 @@
   (into (clue-type have) (clue-type lack)))
 
 (defn combine-knowledge-types [have-knowledge lack-knowledge]
-  {:suspect (combine :suspect have-knowledge lack-knowledge)
-   :weapon (combine :weapon have-knowledge lack-knowledge)
+  {:suspect  (combine :suspect have-knowledge lack-knowledge)
+   :weapon   (combine :weapon have-knowledge lack-knowledge)
    :location (combine :location have-knowledge lack-knowledge)})
 
 (defn filter-known-clues-for-guess
@@ -63,15 +61,15 @@
   [guess game]
   (if (already-know-clue? guess game)
     []
-    (->> {:suspect  (or (clue-known? (:suspect guess) :suspect game) (:suspect guess))
-          :weapon   (or (clue-known? (:weapon guess) :weapon game) (:weapon guess))
-          :location (or (clue-known? (:location guess) :location game) (:location guess))}
+    (->> {:suspect  (or (clue-known? (:suspect guess) :suspect game (:disproved-by guess)) (:suspect guess))
+          :weapon   (or (clue-known? (:weapon guess) :weapon game (:disproved-by guess)) (:weapon guess))
+          :location (or (clue-known? (:location guess) :location game (:disproved-by guess)) (:location guess))}
          (filter (fn [[_ v]] (not= v true)))
          (into {}))))
 
 (defn merge-player-lack [lack guess]
-  {:suspect (conj (or (:suspect lack) #{}) (:suspect guess))
-   :weapon (conj (or (:weapon lack) #{}) (:weapon guess))
+  {:suspect  (conj (or (:suspect lack) #{}) (:suspect guess))
+   :weapon   (conj (or (:weapon lack) #{}) (:weapon guess))
    :location (conj (or (:location lack) #{}) (:location guess))})
 
 (defn deduce-have-knowledge
@@ -104,7 +102,7 @@
 
 
 (defn add-deductions-to-game
-  "Learns what can be deduced and adds that to the games knowledge."
+  "Learns what can be deduced based off of current knowledge and adds that to the games knowledge."
   [game]
   (let [deductions (deduce-have-knowledge game)]
     (if (empty? deductions)
@@ -113,7 +111,7 @@
         (merge game {:have h})))))
 
 (defn deduce-knowledge
-  "Ensures that all knowledge that can be learned is learned by recursing add-deductions-to-game until there are no more changes."
+  "Ensures that all knowledge that can be learned is learned by recuring and adding new deductions until there are no more changes."
   ([game] (deduce-knowledge game nil))
   ([game old-game]
    (if (= game old-game)
@@ -122,7 +120,6 @@
        (add-deductions-to-game game)
        game))))
 
-;TODO Add deductions based on lacking knowledge
 (defn add-turn
   "Uses guess information to deterine if any new information can be deduced based on the game as of yet with the added guess.
   This will recursively call itself until no more additions can be made."

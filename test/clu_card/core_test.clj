@@ -1,6 +1,6 @@
-(ns clue-card.core-test
+(ns clu-card.core-test
   (:require [clojure.test :refer :all]
-            [clue-card.core :refer :all]))
+            [clu-card.core :refer :all]))
 
 (def clue-game-test {:suspect  #{"Mustard" "White" "Peach" "Green" "Plumb"}
                      :weapon   #{"knife" "pipe" "poison" "revolver"}
@@ -14,8 +14,7 @@
                   ;:lack        {"c" {:suspect  #{"White" "Peach" "Green"}
                   ;                   :weapon   #{"pipe" "poison" "revolver"}
                   ;                   :location #{"kitchen" "fountain"}}}
-                  :guesses     []
-                  :poss-clues  clue-game-test})
+                  :guesses     []})
 
 (def base-game-2 {:players     ["a" "b" "c" "d" "e"]
                   :prespective "d"
@@ -71,13 +70,15 @@
                 :weapon   #{"gun" "knife"}
                 :location #{"hall" "dining"}}
 
-               (clue-known? "White" :suspect base-game-1)
+               (clue-known? "White" :suspect base-game-1 "a")
                false
-               (clue-known? "Mustard" :suspect base-game-1)
+               (clue-known? "Mustard" :suspect base-game-1 "a")
                true
-               (clue-known? "gun" :weapon base-game-1)
+               (clue-known? "gun" :weapon base-game-1 "a")
                false
-               (clue-known? "knife" :weapon base-game-1)
+               (clue-known? "knife" :weapon base-game-1 "a")
+               true
+               (clue-known? "gun" :weapon (merge base-game-1 {:lack {"a" {:weapon #{"gun"}}}}) "a")
                true
 
                (filter-known-clues-for-guess (guess "a" "White" "gun" "kitchen" "b") base-game-1)
@@ -171,4 +172,15 @@
 
                (:lack (add-turn (guess "c" "Plumb" "gun" "dining" "b") base-game-1))
                {"a" {:suspect #{"Plumb"} :weapon #{"gun"} :location #{"dining"}} "d" {:suspect #{"Plumb"} :weapon #{"gun"} :location #{"dining"}}}
+
+               (:lack (add-turn (guess "d" "Plumb" "gun" "dining" "b") (merge base-game-1 {:lack {"a" {:suspect #{"Plumb"} :weapon #{"rope"}} "b" {:suspect #{"Green"}}}})))
+               {"a" {:suspect #{"Plumb"} :weapon #{"rope" "gun"} :location #{"dining"}} "b" {:suspect #{"Green"}}}
+
+               (:have (add-turn (guess "c" "Mustard" "gun" "fountain" "b") (merge base-game-1 {:lack {"b" {:location #{"fountain"}}}})))
+               {"c" {:weapon #{"knife"}, :suspect #{"Mustard" "Plumb"}, :location #{"hall" "dining"}}
+                "b" {:weapon #{"gun"}}}
+
+               (:have (add-turn (guess "c" "White" "gun" "hall" "b") (merge base-game-1 {:lack {"b" {:suspect #{"White"} :location #{"hall"}}}})))
+               {"c" {:weapon #{"knife"}, :suspect #{"Mustard" "Plumb"}, :location #{"hall" "dining"}}
+                "b" {:weapon #{"gun"}}}
                )))
